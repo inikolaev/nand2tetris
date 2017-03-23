@@ -7,13 +7,12 @@
  * Computes the sum of two bits.
  */
 
-CHIP HalfAdder {
-    IN a, b;    // 1-bit inputs
-    OUT sum,    // Right bit of a + b 
-        carry;  // Left bit of a + b
+CHIP And3Way {
+    IN a, b, c; // 1-bit inputs
+    OUT out;    // a & b & c
 
     PARTS:
     // Put you code here:
-    Xor(a=a, b=b, out=sum);
-    And(a=a, b=b, out=carry);
+    And(a=a, b=b, out=c0);
+    And(a=c0, b=c, out=out);
 }
