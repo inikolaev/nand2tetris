@@ -1,0 +1,44 @@
+/**
+ * Instruction decoder
+ */
+
+CHIP Decoder {
+    IN instruction[16];
+    OUT type, 
+        address[15], 
+        dest[3], 
+        jump[3];
+
+    PARTS:
+    // Put your code here:
+
+    // RAM
+    Not(in=address[14], out=isMemory);
+    And(a=load, b=isMemory, out=loadMemory);
+    RAM16K(in=in, address=address[0..13], load=loadMemory, out=outMemory);
+
+    // Screen
+    Not(in=address[13], out=o1);
+    And(a=address[14], b=o1, out=isScreen);
+    And(a=load, b=isScreen, out=loadScreen);
+    Screen(in=in, address=address[0..12], load=loadScreen, out=outScreen);
+
+    // Keyboard
+    And(a=address[14], b=address[13], out=isKeyboard);
+    Keyboard(out=outKeyboard);
+
+    // Multiplexor selector
+    And(a=isMemory, b=isKeyboard, out=isMemoryAndKeyboard);
+    Or(a=isMemory, b=isKeyboard, out=isMemoryOrKeyboard);
+    Not(in=isMemoryOrKeyboard, out=isNotMemoryOrKeyboard);
+    Or(a=isScreen, b=isMemoryAndKeyboard, out=isScreenOrMemoryAndKeyboard);
+    Or(a=isScreenOrMemoryAndKeyboard, b=isNotMemoryOrKeyboard, out=selector0);
+
+    And(a=isMemory, b=isScreen, out=isMemoryAndScreen);
+    Or(a=isMemory, b=isScreen, out=isMemoryOrScreen);
+    Not(in=isMemoryOrScreen, out=isNotMemoryOrScreen);
+    Or(a=isKeyboard, b=isMemoryAndScreen, out=isKeyboardOrMemoryAndScreen);
+    Or(a=isKeyboardOrMemoryAndScreen, b=isNotMemoryOrScreen, out=selector1);
+
+    Mux4Way16(a=outMemory, b=outScreen, c=outKeyboard, d=false, sel[0] = selector0, sel[1] = selector1, out=out);
+}
